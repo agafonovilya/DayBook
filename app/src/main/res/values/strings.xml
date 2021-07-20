@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">DayBook</string>
+    <string name="home">Home</string>
+    <string name="schedule">Schedule</string>
+    <string name="notes">Notes</string>
+    <string name="selected">Selected</string>
+    <string name="lessons">Lessons</string>
+    <string name="homework">Homework</string>
+    <string name="open_in">Open in</string>
+    <string name="are_you_ready_for_exams">Are you ready for exams?</string>
+    <string name="minutes">Minutes</string>
+    <string name="hours">Hours</string>
+    <string name="days">Days</string>
+    <string name="_0">0</string>
+    <string name="colon">:</string>
+    <string name="schedule_lesson_item">schedule_lesson_item</string>
+    <string name="schedule_lesson_optional_item">schedule_lesson_optional_item</string>
+</resources>

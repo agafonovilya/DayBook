@@ -19,11 +19,13 @@ class HomeworkListRvAdapter(private val onItemClickListener: (Homework) -> Unit)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeworkViewHolder {
+
+        val binding = ItemHomeworkBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_homework, parent, false)
         //Устанавливаю ширину элемента = 0.7 ширины экрана
         view.layoutParams.width = (parent.width * 0.7).toInt()
-        return HomeworkViewHolder(view, onItemClickListener)
+        return HomeworkViewHolder(binding, onItemClickListener)
     }
 
     override fun onBindViewHolder(holder: HomeworkViewHolder, position: Int) {
@@ -32,11 +34,10 @@ class HomeworkListRvAdapter(private val onItemClickListener: (Homework) -> Unit)
 
     override fun getItemCount() = homeworkList.size
 
-    inner class HomeworkViewHolder(itemView: View, private val onItemClickListener: (Homework) -> Unit) :
-        RecyclerView.ViewHolder(itemView) {
+    inner class HomeworkViewHolder(private val binding: ItemHomeworkBinding, private val onItemClickListener: (Homework) -> Unit) :
+        RecyclerView.ViewHolder(binding.root) {
 
         private val imageLoader = Injection.provideImageLoader()
-        private val binding = ItemHomeworkBinding.bind(itemView)
 
         fun bind(homework: Homework) {
             binding.tvLesson.text = homework.lesson

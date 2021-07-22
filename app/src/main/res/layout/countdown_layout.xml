@@ -14,9 +14,9 @@
         android:text="@string/are_you_ready_for_exams"
         android:textColor="@color/white"
         android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="@+id/countdown_view"
-        app:layout_constraintStart_toStartOf="@+id/countdown_view"
-        app:layout_constraintTop_toTopOf="@+id/countdown_view" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_days_1"

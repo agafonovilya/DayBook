@@ -13,7 +13,7 @@ import ru.agafonovilya.daybook.model.entity.Lesson
 class ScheduleRvAdapter(
     private val onItemClickListener: (Lesson) -> Unit,
     private val onSkypeClickListener: (Lesson) -> Unit
-) : RecyclerView.Adapter<ScheduleRvAdapter.ScheduleViewHolder>() {
+) : RecyclerView.Adapter<ScheduleRvAdapter.ScheduleViewHolderAbstract>() {
 
     var lessonList: List<Lesson> = listOf()
         set(value) {
@@ -21,85 +21,106 @@ class ScheduleRvAdapter(
             notifyDataSetChanged()
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
-        val view: View = when (viewType) {
-            2 -> LayoutInflater.from(parent.context)
-                .inflate(R.layout.schedule_lesson_optional_item, parent, false)
-            else -> {
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.schedule_lesson_item, parent, false)
-            }
-        }
-        return ScheduleViewHolder(
-            view,
-            onItemClickListener,
-            onSkypeClickListener
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolderAbstract {
+        return createScheduleViewHolder(parent, viewType)
     }
 
     override fun getItemViewType(position: Int): Int {
         return if (lessonList[position].isOptional) 2 else 1
     }
 
-    override fun onBindViewHolder(holder: ScheduleViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ScheduleViewHolderAbstract, position: Int) {
         holder.bind(lessonList[position])
     }
 
     override fun getItemCount() = lessonList.size
 
-    inner class ScheduleViewHolder(
-        itemView: View,
-        private val onItemClickListener: (Lesson) -> Unit,
-        private val onSkypeClickListener: (Lesson) -> Unit
+    fun createScheduleViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolderAbstract {
+        when (viewType) {
+            2 -> {
+                val binding = ScheduleLessonOptionalItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                return ScheduleOptionalViewHolder(
+                    binding,
+                    onItemClickListener,
+                    onSkypeClickListener
+                )
+            }
+            else -> {
+                val binding = ScheduleLessonItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                return ScheduleMandatoryViewHolder(
+                    binding,
+                    onItemClickListener,
+                    onSkypeClickListener
+                )
+            }
+        }
+    }
+
+    abstract class ScheduleViewHolderAbstract(
+        itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
 
-        private val imageLoader = Injection.provideImageLoader()
-        private val appResources = Injection.provideAppResources()
+        protected val imageLoader = Injection.provideImageLoader()
 
-        fun bind(lesson: Lesson) {
-            when (itemView.tag) {
+        abstract fun bind(lesson: Lesson)
+    }
 
-                appResources.getString(R.string.schedule_lesson_item) -> {
+    inner class ScheduleMandatoryViewHolder(
+        private val binding: ScheduleLessonItemBinding,
+        private val onItemClickListener: (Lesson) -> Unit,
+        private val onSkypeClickListener: (Lesson) -> Unit
+    ) : ScheduleViewHolderAbstract(binding.root) {
 
-                    val binding = ScheduleLessonItemBinding.bind(itemView)
-                    binding.tvTitle.text = lesson.title
-                    binding.tvTime.text = ("${lesson.timeStart} - ${lesson.timeEnd}")
-                    imageLoader.loadInto(lesson.image, binding.ivImage)
+        override fun bind(lesson: Lesson) {
+            binding.tvTitle.text = lesson.title
+            binding.tvTime.text = ("${lesson.timeStart} - ${lesson.timeEnd}")
+            imageLoader.loadInto(lesson.image, binding.ivImage)
 
-                    if (lesson.isOnline) {
-                        binding.openSkypeLayout.visibility = View.VISIBLE
-                        binding.openSkypeLayout.setOnClickListener {
-                            onSkypeClickListener(lesson)
-                        }
-                    }
-
-                    itemView.setOnClickListener {
-                        onItemClickListener(lesson)
-                    }
+            if (lesson.isOnline) {
+                binding.openSkypeLayout.visibility = View.VISIBLE
+                binding.openSkypeLayout.setOnClickListener {
+                    onSkypeClickListener(lesson)
                 }
+            }
 
-                appResources.getString(R.string.schedule_lesson_optional_item) -> {
+            binding.root.setOnClickListener {
+                onItemClickListener(lesson)
+            }
+        }
+    }
 
-                    val binding = ScheduleLessonOptionalItemBinding.bind(itemView)
-                    binding.tvTitle.text = lesson.title
-                    binding.tvTime.text = ("${lesson.timeStart} - ${lesson.timeEnd}")
-                    imageLoader.loadInto(lesson.image, binding.ivImage)
+    inner class ScheduleOptionalViewHolder(
+        private val binding: ScheduleLessonOptionalItemBinding,
+        private val onItemClickListener: (Lesson) -> Unit,
+        private val onSkypeClickListener: (Lesson) -> Unit
+    ) : ScheduleViewHolderAbstract(binding.root) {
 
-                    lesson.optionalDescription?.let {
-                        binding.tvDescription.text = it
-                    }
+        override fun bind(lesson: Lesson) {
+            binding.tvTitle.text = lesson.title
+            binding.tvTime.text = ("${lesson.timeStart} - ${lesson.timeEnd}")
+            imageLoader.loadInto(lesson.image, binding.ivImage)
 
-                    if (lesson.isOnline) {
-                        binding.openSkypeLayout.visibility = View.VISIBLE
-                        binding.openSkypeLayout.setOnClickListener {
-                            onSkypeClickListener(lesson)
-                        }
-                    }
+            lesson.optionalDescription?.let {
+                binding.tvDescription.text = it
+            }
 
-                    itemView.setOnClickListener {
-                        onItemClickListener(lesson)
-                    }
+            if (lesson.isOnline) {
+                binding.openSkypeLayout.visibility = View.VISIBLE
+                binding.openSkypeLayout.setOnClickListener {
+                    onSkypeClickListener(lesson)
                 }
+            }
+
+            itemView.setOnClickListener {
+                onItemClickListener(lesson)
             }
         }
     }
